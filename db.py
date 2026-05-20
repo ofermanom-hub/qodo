@@ -28,10 +28,10 @@ class TodoStore:
         return {"id": cur.lastrowid, "user_id": user_id, "title": title, "done": False}
 
     def list_for_user(self, user_id: str) -> list[dict[str, Any]]:
-        # PLANTED ISSUE #1: SQL injection via string concatenation.
-        # A request like /todos?user_id=' OR '1'='1 leaks every user's todos.
-        query = "SELECT id, user_id, title, done FROM todos WHERE user_id = '" + user_id + "'"
-        rows = self._conn.execute(query).fetchall()
+        rows = self._conn.execute(
+            "SELECT id, user_id, title, done FROM todos WHERE user_id = ?",
+            (user_id,),
+        ).fetchall()
         return [
             {"id": r[0], "user_id": r[1], "title": r[2], "done": bool(r[3])}
             for r in rows
