@@ -1,0 +1,42 @@
+# Qodo / PR-Agent configuration for the Tasky demo repo.
+# Docs: https://qodo-merge-docs.qodo.ai/usage-guide/configuration_options/
+
+[config]
+# Use the multi-agent review experience.
+model = "auto"
+verbosity_level = 1
+
+[pr_reviewer]
+require_security_review = true
+require_tests_review = true
+require_score_review = true
+num_code_suggestions = 6
+
+[pr_description]
+publish_labels = true
+add_original_user_description = true
+
+[pr_code_suggestions]
+num_code_suggestions = 6
+commitable_code_suggestions = true
+
+# ---- Custom org rules ----
+# These are enforced on every PR. They demonstrate Qodo's ability to encode
+# house style and security policy beyond generic best practices.
+[custom_rules]
+rules = [
+  # Logging discipline
+  "All log output MUST go through `app_logger` (or `logging.getLogger(...)`). Direct `print()` calls in application code are a violation. Tests and one-off scripts under `scripts/` are exempt.",
+
+  # SQL safety
+  "All SQL must be parameterized. String concatenation or f-string interpolation of user input into SQL is a critical security violation. Use the DB-API `?` placeholders or an ORM.",
+
+  # Upstream calls
+  "Any function whose return type is `Optional[...]` MUST be None-checked by every caller before its result is dereferenced or indexed.",
+
+  # Performance
+  "Avoid nested loops over the same collection when a single-pass dict/Counter would do. Flag any O(n^2) pattern over user-supplied data.",
+
+  # Test coverage
+  "Every new public Flask route MUST have at least one test in `tests/` covering the happy path.",
+]
