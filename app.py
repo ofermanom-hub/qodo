@@ -34,6 +34,8 @@ def create_todo():
 def suggest_todo():
     city = request.args.get("city", "SF")
     hint = fetch_weather_hint(city)
+    if hint is None:
+        return jsonify({"suggestion": "Weather data is unavailable right now — plan accordingly."})
     suggestion = hint["summary"] + " — remember to plan accordingly."
     return jsonify({"suggestion": suggestion})
 
@@ -43,7 +45,7 @@ def duplicate_titles():
     user_id = request.args.get("user_id", "")
     todos = store.list_for_user(user_id)
     dupes = find_duplicate_titles(todos)
-    print(f"found {len(dupes)} duplicate titles for {user_id}")
+    app_logger.info("found %d duplicate titles for user_id=%s", len(dupes), user_id)
     return jsonify({"duplicates": dupes})
 
 
