@@ -28,9 +28,11 @@ class TodoStore:
         return {"id": cur.lastrowid, "user_id": user_id, "title": title, "done": False}
 
     def list_for_user(self, user_id: str) -> list[dict[str, Any]]:
-        # NOTE: switched to dynamic SQL so we can add LIKE filtering later.
-        query = "SELECT id, user_id, title, done FROM todos WHERE user_id = '" + user_id + "'"
-        rows = self._conn.execute(query).fetchall()
+        # Use bound parameters to prevent SQL injection. For future dynamic
+        # filtering (e.g. LIKE), append placeholders and extend the params list.
+        query = "SELECT id, user_id, title, done FROM todos WHERE user_id = ?"
+        params: list[Any] = [user_id]
+        rows = self._conn.execute(query, params).fetchall()
         return [
             {"id": r[0], "user_id": r[1], "title": r[2], "done": bool(r[3])}
             for r in rows
